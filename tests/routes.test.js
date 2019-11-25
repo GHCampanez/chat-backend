@@ -58,8 +58,8 @@ describe('Test secured endpoints', () => {
 
     })
 
-    afterAll((done) => {
-        app.close()
+    afterAll(async (done) => {
+        await app.close()
         done()
     })
 

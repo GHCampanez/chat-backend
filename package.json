@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./app.js",
-    "test": "jest --detectOpenHandles",
+    "test": "jest --forceExit",
     "coveralls": "jest --coverage && cat ./tests/coverage/lcov.info | coveralls"
   },
   "dependencies": {
