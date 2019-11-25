@@ -57,4 +57,12 @@ describe('Test secured endpoints', () => {
         done()
 
     })
+
+    afterAll((done) => {
+        app.close()
+        done()
+    })
+
 })
+
+

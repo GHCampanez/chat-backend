@@ -11,6 +11,6 @@ app.use(bodyParser.urlencoded({extended:false}))
 //importa as rotas de autenticacao e do projeto
 require('./controller/index')(app)
 
-app.listen(process.env.PORT || 5000)
+const server = app.listen(process.env.PORT || 5000)
 
-module.exports = app
+module.exports = server
