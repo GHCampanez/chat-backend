@@ -43,7 +43,7 @@ router.post('/verify', async (req, res) => {
     const token = jwt.sign({ id: user.id }, authSecret, {
         expiresIn: 86400,
     });
-    res.send({
+    res.status(200).send({
         user,
         token: generateToken({ id: user.id })
     });
