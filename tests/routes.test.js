@@ -3,7 +3,7 @@ const app = require('../app')
 
 
 describe('Verify users', () => {
-    it('It should return a user', async () => {
+    it('It should return a user', async (done) => {
         const res = await request(app)
             .post('/user/verify')
             .send({
@@ -12,11 +12,12 @@ describe('Verify users', () => {
             })
         expect(res.statusCode).toEqual(200)
         expect(res.body).toHaveProperty('user')
+        done()
     })
 })
 
 describe('Verify users', () => {
-    it('It should return a message that user already exists', async () => {
+    it('It should return a message that user already exists', async (done) => {
         const res = await request(app)
             .post('/user/register')
             .send({
@@ -25,6 +26,7 @@ describe('Verify users', () => {
             })
         expect(res.statusCode).toEqual(400)
         expect(res.body).toHaveProperty('error')
+        done()
     })
 })
 
@@ -45,13 +47,14 @@ describe('Test secured endpoints', () => {
     });
 
 
-    it('should get a valid token for list users', async () => {
+    it('should get a valid token for list users', async (done) => {
 
         const res = await request(app)
             .get('/chat/users')
             .set('Authorization', 'Bearer ' + token)
 
         expect(res.statusCode).toEqual(200)
+        done()
 
     })
 })
