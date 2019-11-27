@@ -60,6 +60,17 @@ describe('Test secured endpoints', () => {
 
     })
 
+    it('should get an invalid token for list users', async (done) => {
+
+        const res = await request(app)
+            .get('/chat/users')
+            .set('Authorization', 'Bearer potato')
+
+        expect(res.statusCode).toEqual(401)
+        done()
+
+    })
+
     it('should get a conversation by name teste', async (done) => {
 
         const res = await request(app)
@@ -84,6 +95,22 @@ describe('Test secured endpoints', () => {
 
 
         expect(res.statusCode).toEqual(200)
+        done()
+
+    })
+
+    it('should post a new message to conversation by name teste with an invalid token', async (done) => {
+
+        const res = await request(app)
+            .post(`/chat/conversation?chat=teste`)
+            .send({
+                chatName: 'teste',
+                messages: [...messages, { user: 'teste', message: 'New message teste' }]
+            })
+            .set('Authorization', 'Bearer potato')
+
+
+        expect(res.statusCode).toEqual(401)
         done()
 
     })
