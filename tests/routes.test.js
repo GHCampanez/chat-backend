@@ -116,6 +116,20 @@ describe('Test secured endpoints', () => {
     })
 
 
+    it('should get a conversation and check the content message', async (done) => {
+
+        const res = await request(app)
+            .get(`/chat/conversation?chat=teste`)
+            .set('Authorization', 'Bearer ' + token)
+
+        messages = res.body.messages
+        //Check the last message is the same as the older test 
+        expect(messages[messages.length-1].message).toEqual('New message teste')
+        done()
+
+    })
+
+
 
 
     afterAll(async (done) => {
