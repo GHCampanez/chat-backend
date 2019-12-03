@@ -1,42 +1,25 @@
 const request = require('supertest')
-const app = require('../app')
 
-
-describe('Verify users', () => {
-    it('It should return a user', async (done) => {
-        const res = await request(app)
-            .post('/user/verify')
-            .send({
-                name: 'teste',
-                password: 'teste',
-            })
-        expect(res.statusCode).toEqual(200)
-        expect(res.body).toHaveProperty('user')
-        done()
-    })
-})
-
-describe('Verify users', () => {
-    it('It should return a message that user already exists', async (done) => {
-        const res = await request(app)
-            .post('/user/register')
-            .send({
-                name: 'teste',
-                password: 'teste',
-            })
-        expect(res.statusCode).toEqual(400)
-        expect(res.body).toHaveProperty('error')
-        done()
-    })
-})
 
 describe('Test secured endpoints', () => {
+
+    var server
+
+    beforeAll(() => {
+        delete require.cache[require.resolve('../app')]
+        server = require('../app')
+    })
+
+
+    afterAll(async (done) => {
+        await server.close(done)
+    })
 
     var token
     var messages = []
 
     beforeAll((done) => {
-        request(app)
+        request(server)
             .post('/user/verify')
             .send({
                 name: 'teste',
@@ -51,7 +34,7 @@ describe('Test secured endpoints', () => {
 
     it('should get a valid token for list users', async (done) => {
 
-        const res = await request(app)
+        const res = await request(server)
             .get('/chat/users')
             .set('Authorization', 'Bearer ' + token)
 
@@ -62,7 +45,7 @@ describe('Test secured endpoints', () => {
 
     it('should get an invalid token for list users', async (done) => {
 
-        const res = await request(app)
+        const res = await request(server)
             .get('/chat/users')
             .set('Authorization', 'Bearer potato')
 
@@ -73,7 +56,7 @@ describe('Test secured endpoints', () => {
 
     it('should get a conversation by name teste', async (done) => {
 
-        const res = await request(app)
+        const res = await request(server)
             .get(`/chat/conversation?chat=teste`)
             .set('Authorization', 'Bearer ' + token)
 
@@ -85,7 +68,7 @@ describe('Test secured endpoints', () => {
 
     it('should post a new message to conversation by name teste', async (done) => {
 
-        const res = await request(app)
+        const res = await request(server)
             .post(`/chat/conversation?chat=teste`)
             .send({
                 chatName: 'teste',
@@ -101,7 +84,7 @@ describe('Test secured endpoints', () => {
 
     it('should post a new message to conversation by name teste with an invalid token', async (done) => {
 
-        const res = await request(app)
+        const res = await request(server)
             .post(`/chat/conversation?chat=teste`)
             .send({
                 chatName: 'teste',
@@ -118,13 +101,13 @@ describe('Test secured endpoints', () => {
 
     it('should get a conversation and check the content message', async (done) => {
 
-        const res = await request(app)
+        const res = await request(server)
             .get(`/chat/conversation?chat=teste`)
             .set('Authorization', 'Bearer ' + token)
 
         messages = res.body.messages
         //Check the last message is the same as the older test 
-        expect(messages[messages.length-1].message).toEqual('New message teste')
+        expect(messages[messages.length - 1].message).toEqual('New message teste')
         done()
 
     })
@@ -132,10 +115,6 @@ describe('Test secured endpoints', () => {
 
 
 
-    afterAll(async (done) => {
-        await app.close()
-        done()
-    })
 
 })
 
