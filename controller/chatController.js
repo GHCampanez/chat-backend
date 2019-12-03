@@ -55,4 +55,23 @@ router.post('/conversation', async (req, res) => {
     }
 })
 
+router.post('/conversation/message', async (req, res) => {
+
+    const { chatName, message, user } = req.body
+    try {
+        let chat = await Messages.findOne({ chatName })
+        chat.messages.push({ message, user })
+
+        Messages.findOneAndUpdate({ chatName }, { chatName, messages: chat.messages }, { upsert: true }, function (err, doc) {
+            if (err) return res.send(500, { error: err })
+            res.status(200).send(doc)
+        })
+
+
+    } catch (err) {
+        res.status(400).send({ error: "falha ao atualizar mensagens" })
+
+    }
+})
+
 module.exports = app => app.use('/chat', router);

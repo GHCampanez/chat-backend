@@ -61,6 +61,7 @@ describe('Test secured endpoints', () => {
             .set('Authorization', 'Bearer ' + token)
 
         messages = res.body.messages
+        console.log()
         expect(res.statusCode).toEqual(200)
         done()
 
@@ -69,10 +70,11 @@ describe('Test secured endpoints', () => {
     it('should post a new message to conversation by name teste', async (done) => {
 
         const res = await request(server)
-            .post(`/chat/conversation?chat=teste`)
+            .post(`/chat/conversation/message`)
             .send({
                 chatName: 'teste',
-                messages: [...messages, { user: 'teste', message: 'New message teste' }]
+                user: 'teste',
+                message: 'new msg'
             })
             .set('Authorization', 'Bearer ' + token)
 
@@ -85,7 +87,7 @@ describe('Test secured endpoints', () => {
     it('should post a new message to conversation by name teste with an invalid token', async (done) => {
 
         const res = await request(server)
-            .post(`/chat/conversation?chat=teste`)
+            .post(`/chat/conversation`)
             .send({
                 chatName: 'teste',
                 messages: [...messages, { user: 'teste', message: 'New message teste' }]
@@ -107,7 +109,8 @@ describe('Test secured endpoints', () => {
 
         messages = res.body.messages
         //Check the last message is the same as the older test 
-        expect(messages[messages.length - 1].message).toEqual('New message teste')
+
+        expect(messages[messages.length - 1].message).toEqual('new msg')
         done()
 
     })
