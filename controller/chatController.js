@@ -13,10 +13,11 @@ const authMiddleware = require('./auth')
 router.use(authMiddleware)
 
 // create and connect redis client to local instance.
+let client
 if (process.env.REDIS_URL) 
-    const client = redis.createClient(process.env.REDIS_URL)
+    client = redis.createClient(process.env.REDIS_URL)
 else
-    const client = redis.createClient(6379)
+    client = redis.createClient(6379)
 
 // echo redis errors to the console
 client.on('error', (err) => {
