@@ -1,5 +1,6 @@
 const express = require('express')
 const multer = require('multer')
+const redis = require('redis')
 
 const router = express.Router()
 const multerupload = multer({ dest: 'video/' })
@@ -11,18 +12,39 @@ const authMiddleware = require('./auth')
 
 router.use(authMiddleware)
 
+// create and connect redis client to local instance.
+const client = redis.createClient(6379)
+
+// echo redis errors to the console
+client.on('error', (err) => {
+    console.log("Error " + err)
+});
+
 router.get('/users', async (req, res) => {
 
-    try {
-        //procura todos usuarios
-        const user = await User.find({});
+    const userRedisKey = 'user:list'
 
-        res.status(200).send(user);
-        // res.status(200).send(JSON.stringify(user));
-    } catch (err) {
-        res.status(400).send({ error: "falha ao listar usuarios" });
+    return client.get(userRedisKey, async (err, users) => {
 
-    }
+        if (users) {
+            res.status(200).send(users)
+        } else {
+
+            try {
+
+                //find all users
+                const user = await User.find({})
+
+                client.setex(userRedisKey, 600, JSON.stringify(user))
+                res.status(200).send(user)
+            } catch (err) {
+                res.status(400).send({ error: "falha ao listar usuarios" });
+
+            }
+        }
+
+    })
+
 })
 
 router.get('/conversation', async (req, res) => {
