@@ -1,5 +1,8 @@
 const express = require('express')
+const multer = require('multer')
+
 const router = express.Router()
+const multerupload = multer({ dest: 'video/' })
 
 const User = require('../model/user')
 const Messages = require('../model/messages')
@@ -73,5 +76,32 @@ router.post('/conversation/message', async (req, res) => {
 
     }
 })
+
+
+router.post('/conversation/video', multerupload.any(), async (req, res) => {
+
+    const { chatName, message } = req.body
+    const video = req.files[0]
+    console.log(req.body)
+    console.log(video)
+
+
+    /*try {
+        let chat = await Messages.findOne({ chatName })
+        chat.messages.push({ message, user, video })
+
+        Messages.findOneAndUpdate({ chatName }, { chatName, messages: chat.messages }, { upsert: true }, function (err, doc) {
+            if (err) return res.send(500, { error: err })
+            res.status(200).send(doc)
+        })
+
+
+    } catch (err) {
+        res.status(400).send({ error: "falha ao atualizar mensagens" })
+
+    }*/
+})
+
+
 
 module.exports = app => app.use('/chat', router);
