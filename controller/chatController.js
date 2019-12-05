@@ -1,7 +1,7 @@
 const express = require('express')
 const multer = require('multer')
 const redis = require('redis')
-
+const fs = require('fs')
 const router = express.Router()
 const multerupload = multer({ dest: 'video/' })
 
@@ -10,11 +10,22 @@ const Messages = require('../model/messages')
 const authMiddleware = require('./auth')
 
 
-router.use(authMiddleware)
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads')
+    },
+    filename: function (req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now())
+    }
+})
+
+var upload = multer({ storage: storage })
+
+//router.use(authMiddleware)
 
 // create and connect redis client to local instance.
 let client
-if (process.env.REDIS_URL) 
+if (process.env.REDIS_URL)
     client = redis.createClient(process.env.REDIS_URL)
 else
     client = redis.createClient(6379)
@@ -104,17 +115,18 @@ router.post('/conversation/message', async (req, res) => {
 })
 
 
-router.post('/conversation/video', multerupload.any(), async (req, res) => {
-
-    const { chatName, message } = req.body
-    const video = req.files[0]
-    console.log(req.body)
-    console.log(video)
 
 
-    /*try {
+router.post('/conversation/video', upload.single('video'), async (req, res) => {
+
+    let { chatName, message, user } = req.body
+
+    const video = req.file
+    let url = req.protocol + '://' + req.get('host') + '/video?videoPath='+video.path;
+
+    try {
         let chat = await Messages.findOne({ chatName })
-        chat.messages.push({ message, user, video })
+        chat.messages.push({ message, user, video: url })
 
         Messages.findOneAndUpdate({ chatName }, { chatName, messages: chat.messages }, { upsert: true }, function (err, doc) {
             if (err) return res.send(500, { error: err })
@@ -125,7 +137,8 @@ router.post('/conversation/video', multerupload.any(), async (req, res) => {
     } catch (err) {
         res.status(400).send({ error: "falha ao atualizar mensagens" })
 
-    }*/
+    }
+
 })
 
 

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const local = 'mongodb://localhost/chat'
 const atlas = 'mongodb+srv://teste:teste@cluster0-bcexw.mongodb.net/test?retryWrites=true&w=majority'
-mongoose.connect(atlas,{ useNewUrlParser: true, poolSize: 10});
+mongoose.connect(atlas, { useNewUrlParser: true, poolSize: 10 });
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.Promise = global.Promise;
