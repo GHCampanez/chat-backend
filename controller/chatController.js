@@ -21,7 +21,7 @@ var storage = multer.diskStorage({
 
 var upload = multer({ storage: storage })
 
-//router.use(authMiddleware)
+router.use(authMiddleware)
 
 // create and connect redis client to local instance.
 let client
