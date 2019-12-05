@@ -122,7 +122,15 @@ router.post('/conversation/video', upload.single('video'), async (req, res) => {
     let { chatName, message, user } = req.body
 
     const video = req.file
-    let url = req.protocol + '://' + req.get('host') + '/video?videoPath='+video.path;
+    var totalSizeMB = Number(video.size / Math.pow(1024, 2).toFixed(1))
+
+
+
+    //Limit video size for 5mb
+    if (totalSizeMB > 5.0)
+        return res.status(400).send({ error: 'Tamanho máximo de 5mb excedido' })
+    
+    let url = req.protocol + '://' + req.get('host') + '/video?videoPath=' + video.path;
 
     try {
         let chat = await Messages.findOne({ chatName })
@@ -135,7 +143,7 @@ router.post('/conversation/video', upload.single('video'), async (req, res) => {
 
 
     } catch (err) {
-        res.status(400).send({ error: "falha ao atualizar mensagens" })
+        res.status(400).send({ error: 'falha ao atualizar mensagens' })
 
     }
 
