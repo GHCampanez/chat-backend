@@ -1,7 +1,7 @@
 const express = require('express')
 const multer = require('multer')
 const router = express.Router()
-const client = require('./clientReds')
+const client = require('./clientRedis')
 const User = require('../model/user')
 const Messages = require('../model/messages')
 const authMiddleware = require('./auth')
@@ -149,7 +149,7 @@ router.post('/conversation/video', upload.single('video'), async (req, res) => {
 
             const conversationRedisKey = `messages:${chatName}`
             client.del(conversationRedisKey)  
-            
+
             res.status(200).send(doc)
         })
 
