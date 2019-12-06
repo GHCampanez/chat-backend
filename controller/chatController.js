@@ -12,7 +12,7 @@ var storage = multer.diskStorage({
         cb(null, 'uploads')
     },
     filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now()+'.mp4')
+        cb(null, file.fieldname + '-' + Date.now() + '.mp4')
     }
 })
 
@@ -51,19 +51,33 @@ router.get('/users', async (req, res) => {
 router.get('/conversation', async (req, res) => {
 
     const chatName = req.query.chat
+    const conversationRedisKey = `messages:${chatName}`
 
-    try {
-        let message = await Messages.findOne({ chatName })
+    return client.get(conversationRedisKey, async (err, messages) => {
 
-        if (message == null)
-            message = await Messages.create({ chatName: chatName, messages: [] })
+        if (messages) {
+            res.status(200).send(messages)
+        } else {
 
-        res.status(200).send(message);
+            try {
 
-    } catch (err) {
-        res.status(400).send({ error: "falha ao buscar conversas" });
 
-    }
+                let message = await Messages.findOne({ chatName })
+
+                if (message == null)
+                    message = await Messages.create({ chatName: chatName, messages: [] })
+
+                client.setex(conversationRedisKey, 600, JSON.stringify(message))
+
+                res.status(200).send(message);
+
+            } catch (err) {
+                res.status(400).send({ error: "falha ao buscar conversas" });
+
+            }
+
+        }
+    })
 })
 
 router.post('/conversation', async (req, res) => {
@@ -72,6 +86,10 @@ router.post('/conversation', async (req, res) => {
     try {
         Messages.findOneAndUpdate({ chatName }, { chatName, messages }, { upsert: true }, function (err, doc) {
             if (err) return res.send(500, { error: err })
+
+            const conversationRedisKey = `messages:${chatName}`
+            client.del(conversationRedisKey)
+
             res.status(200).send(doc)
         })
 
@@ -90,6 +108,10 @@ router.post('/conversation/message', async (req, res) => {
 
         Messages.findOneAndUpdate({ chatName }, { chatName, messages: chat.messages }, { upsert: true }, function (err, doc) {
             if (err) return res.send(500, { error: err })
+
+            const conversationRedisKey = `messages:${chatName}`
+            client.del(conversationRedisKey)    
+
             res.status(200).send(doc)
         })
 
@@ -115,7 +137,7 @@ router.post('/conversation/video', upload.single('video'), async (req, res) => {
     //Limit video size for 5mb
     if (totalSizeMB > 5.0)
         return res.status(400).send({ error: 'Tamanho máximo de 5mb excedido' })
-    
+
     let url = req.protocol + '://' + req.get('host') + '/video?videoPath=' + video.path;
 
     try {
@@ -124,6 +146,10 @@ router.post('/conversation/video', upload.single('video'), async (req, res) => {
 
         Messages.findOneAndUpdate({ chatName }, { chatName, messages: chat.messages }, { upsert: true }, function (err, doc) {
             if (err) return res.send(500, { error: err })
+
+            const conversationRedisKey = `messages:${chatName}`
+            client.del(conversationRedisKey)  
+            
             res.status(200).send(doc)
         })
 
