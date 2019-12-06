@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt')
 const User = require('../model/user')
 const authSecret = '0800fc577294c34e0b28ad2839435945'
 const jwt = require('jsonwebtoken')
+const client = require('./clientReds')
 
 router.post('/register', async (req, res) => {
 
@@ -16,6 +17,9 @@ router.post('/register', async (req, res) => {
 
         //Adiciona um novo usuarios
         const user = await User.create(req.body);
+
+        const userRedisKey = 'user:list'
+        client.del(userRedisKey);
 
         return res.send({
             user,

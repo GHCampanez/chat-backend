@@ -1,10 +1,7 @@
 const express = require('express')
 const multer = require('multer')
-const redis = require('redis')
-const fs = require('fs')
 const router = express.Router()
-const multerupload = multer({ dest: 'video/' })
-
+const client = require('./clientReds')
 const User = require('../model/user')
 const Messages = require('../model/messages')
 const authMiddleware = require('./auth')
@@ -23,17 +20,6 @@ var upload = multer({ storage: storage })
 
 router.use(authMiddleware)
 
-// create and connect redis client to local instance.
-let client
-if (process.env.REDIS_URL)
-    client = redis.createClient(process.env.REDIS_URL)
-else
-    client = redis.createClient(6379)
-
-// echo redis errors to the console
-client.on('error', (err) => {
-    console.log("Error " + err)
-});
 
 router.get('/users', async (req, res) => {
 
